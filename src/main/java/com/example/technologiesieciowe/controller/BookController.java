@@ -2,6 +2,7 @@ package com.example.technologiesieciowe.controller;
 
 import com.example.technologiesieciowe.entity.Book;
 import com.example.technologiesieciowe.repository.BookRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 public class BookController {
 
     private final BookRepository bookRepository;
+    @Autowired
+
     public BookController(BookRepository bookRepository){
         this.bookRepository = bookRepository;
     }
