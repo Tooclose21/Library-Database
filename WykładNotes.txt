@@ -1,0 +1,9 @@
+
+Światłowody 
+- wielomodowe - mają grubszy rdzeń, tańsze, różna droga impulsu
+- jednomodowe - "jeden" promień światła, światło idzie dalej, mniejsze zniekształcenia, cieńszy rdzeń
+
+Kable wyższych kategorii tłumią mniej (od 1szej do 12)
+
+Identyfikatory ISO (znaczenia liter w UTP, STP...)
+
