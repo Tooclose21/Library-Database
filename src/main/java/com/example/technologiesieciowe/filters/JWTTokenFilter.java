@@ -1,0 +1,56 @@
+package com.example.technologiesieciowe.filters;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+import java.io.IOException;
+import java.util.List;
+
+/**
+ * The type Jwt token filter.
+ */
+public class JWTTokenFilter extends OncePerRequestFilter {
+    private String key;
+
+    /**
+     * Instantiates a new Jwt token filter.
+     *
+     * @param key the key
+     */
+    public JWTTokenFilter(String key){
+        this.key = key;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.split(" ")[1];
+            Claims claims = Jwts.parser()
+                    .setSigningKey(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            String userId = (String) claims.get("id");
+            String userRole = (String) claims.get("role");
+            Authentication authentication =
+                    new UsernamePasswordAuthenticationToken(userId, null,
+                            List.of(new SimpleGrantedAuthority(userRole)));
+            //Rola użytkowanika w bazie powinna być zapisana jako ROLE_NAZWA
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else {
+            SecurityContextHolder.getContext().setAuthentication(null);
+
+        }
+        filterChain.doFilter(request, response);
+    }
+}
