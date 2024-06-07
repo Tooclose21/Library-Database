@@ -4,7 +4,7 @@ package com.example.technologiesieciowe.dto.entity;
  * The type Book dto.
  */
 public class BookDto {
-    private Integer Id;
+    private Integer id;
     private String isbn;
     private String title;
     private String author;
@@ -18,7 +18,7 @@ public class BookDto {
      * @return the id
      */
     public Integer getId() {
-        return Id;
+        return id;
     }
 
     /**
@@ -27,7 +27,7 @@ public class BookDto {
      * @param id the id
      */
     public void setId(Integer id) {
-        Id = id;
+        this.id = id;
     }
 
     /**

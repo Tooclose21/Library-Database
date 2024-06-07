@@ -5,8 +5,11 @@ import com.example.technologiesieciowe.dto.mappers.BookMapper;
 import com.example.technologiesieciowe.entity.Book;
 import com.example.technologiesieciowe.entity.User;
 import com.example.technologiesieciowe.filters.LoginForm;
+import com.example.technologiesieciowe.filters.TokenParser;
 import com.example.technologiesieciowe.repository.BookRepository;
+import com.example.technologiesieciowe.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,6 +25,8 @@ import java.util.stream.StreamSupport;
 public class BookController {
 
     private final BookRepository bookRepository;
+    private final TokenParser tokenParser;
+    private final LoanRepository loanRepository;
 
     /**
      * Instantiates a new Book controller.
@@ -30,8 +35,10 @@ public class BookController {
      */
     @Autowired
 
-    public BookController(BookRepository bookRepository){
+    public BookController(BookRepository bookRepository, TokenParser tokenParser, LoanRepository loanRepository){
         this.bookRepository = bookRepository;
+        this.tokenParser = tokenParser;
+        this.loanRepository = loanRepository;
     }
 
     /**
@@ -84,5 +91,13 @@ public class BookController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete book");
         }
+    }
+
+    @GetMapping("/getForUser")
+    public Iterable <BookDto> getForUser(@RequestHeader HttpHeaders headers){
+        String header = headers.get("Authorization").get(0);
+        int userId = tokenParser.getUserId(header);
+        return StreamSupport.stream(loanRepository.findByUser_Id(userId).spliterator(),false)
+                .map(loan -> loan.getBook()).map(BookMapper::toDto).toList();
     }
 }

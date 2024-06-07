@@ -35,7 +35,6 @@ public class LoginController {
      */
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginForm loginForm){
-        System.out.println(loginForm.getUsername());
         String token = loginService.login(loginForm);
         return ResponseEntity.ofNullable(token);
     }

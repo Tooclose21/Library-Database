@@ -11,11 +11,11 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer Id;
     @Column(unique = true)
-    private String username;
-    private String password;
-    private String role;
-    private String email;
-    private String fullUsername;
+        private String username;
+        private String password;
+        private String role;
+        private String email;
+        private String fullUsername;
 
     /**
      * Gets id.

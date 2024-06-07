@@ -7,8 +7,10 @@ import com.example.technologiesieciowe.dto.mappers.BookMapper;
 import com.example.technologiesieciowe.dto.mappers.LoanMapper;
 import com.example.technologiesieciowe.entity.Book;
 import com.example.technologiesieciowe.entity.Loan;
+import com.example.technologiesieciowe.filters.TokenParser;
 import com.example.technologiesieciowe.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +26,7 @@ import java.util.stream.StreamSupport;
 public class LoanController {
 
     private final LoanRepository loanRepository;
+    private final TokenParser tokenParser;
 
     /**
      * Instantiates a new Loan controller.
@@ -32,8 +35,9 @@ public class LoanController {
      */
     @Autowired
 
-    public LoanController(LoanRepository loanRepository){
+    public LoanController(LoanRepository loanRepository, TokenParser tokenParser){
         this.loanRepository = loanRepository;
+        this.tokenParser = tokenParser;
     }
 
     /**
@@ -76,4 +80,24 @@ public class LoanController {
     public @ResponseBody Iterable<LoanDto> getByUserID(@RequestParam int userID){
         return StreamSupport.stream(loanRepository.findByUser_Id(userID).spliterator(),false).map(LoanMapper::toDto).toList();
     }
+
+    @GetMapping("/getForUser")
+    public @ResponseBody Iterable<LoanDto> getForMe(@RequestHeader HttpHeaders headers){
+        String header = headers.get("Authorization").get(0);
+        int userId = tokenParser.getUserId(header);
+        return StreamSupport.stream(loanRepository.findByUser_Id(userId).spliterator(),false).map(LoanMapper::toDto).toList();
+    }
+
+    @PostMapping("/addForMe")
+    public @ResponseBody LoanDto addForMe(@RequestBody LoanDto loan, @RequestHeader HttpHeaders headers){
+        String header = headers.get("Authorization").get(0);
+        int userId = tokenParser.getUserId(header);
+        loan.getUser().setId(userId);
+
+        Loan entity = loanRepository.save(LoanMapper.fromDto(loan));
+        return LoanMapper.toDto(entity);
+    }
+
 }
+
+
