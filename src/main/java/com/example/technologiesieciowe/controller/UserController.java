@@ -3,7 +3,6 @@ package com.example.technologiesieciowe.controller;
 import com.example.technologiesieciowe.dto.entity.UserDto;
 import com.example.technologiesieciowe.dto.mappers.UserMapper;
 import com.example.technologiesieciowe.entity.User;
-import com.example.technologiesieciowe.filters.LoginForm;
 import com.example.technologiesieciowe.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.stream.StreamSupport;
 
 /**
@@ -61,22 +61,26 @@ public class UserController {
      */
     @GetMapping("/getAll")
     public @ResponseBody Iterable<UserDto> getAllUsers(){
-        return StreamSupport.stream(userRepository.findAll().spliterator(),false).map(UserMapper::toDto).toList();
+        return StreamSupport.stream(userRepository.findAll().spliterator(),false)
+                .map(UserMapper::toDto)
+                .filter(it -> !it.getPassword().isBlank())
+                .toList();
     }
 
     /**
      * Delete user.
      *
-     * @param loginForm the login form
+     * @param user user
+     * @return
      */
-    @DeleteMapping("/delete")
-    public void deleteUser(@RequestBody LoginForm loginForm){
+    @PostMapping("/delete")
+    public @ResponseBody Iterable<UserDto> deleteUser(@RequestBody UserDto user){
         try {
-            User user = userRepository.findByUsername(loginForm.getUsername());
-            if (!encoder.matches(loginForm.getPassword(), user.getPassword())){
-                return;
-            }
-            userRepository.delete(userRepository.findByUsername(loginForm.getUsername()));
+            userRepository.save(UserMapper.fromDto(user));
+            return StreamSupport.stream(userRepository.findAll().spliterator(),false)
+                    .map(UserMapper::toDto)
+                    .filter(it -> !it.getPassword().isBlank())
+                    .toList();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete user");
         }

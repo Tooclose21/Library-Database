@@ -31,9 +31,13 @@ public class LoginService {
      */
     public String login(LoginForm loginFrom){
         User user = userRepository.findByUsername(loginFrom.getUsername());
+        if (user.getPassword().isBlank()) {
+            return null;
+        }
         if(passwordEncoder.matches(loginFrom.getPassword(), user.getPassword())){
             long timestamp = System.currentTimeMillis();
 
+            System.out.println(user.getRole());
             String token = Jwts.builder()
                     .issuedAt(new Date(timestamp))
                     .expiration(new Date(timestamp + 5 * 60 * 1000))

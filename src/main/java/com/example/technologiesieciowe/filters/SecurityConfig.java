@@ -3,6 +3,7 @@ package com.example.technologiesieciowe.filters;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -31,6 +32,7 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
+
                 .sessionManagement(httpSecuritySessionManagementConfigurer -> {
                     httpSecuritySessionManagementConfigurer
                             .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -38,8 +40,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizationManagerRequestMatcherRegistry ->
                         authorizationManagerRequestMatcherRegistry
                                 //.requestMatchers("/user/**").hasRole("Librarian")
+                                .requestMatchers(HttpMethod.OPTIONS).permitAll()
                                 .requestMatchers("/login").permitAll()
+                                .requestMatchers("/book/getById").hasRole("LIBRARIAN")
                                 .requestMatchers("/getAllBooks").hasRole("User")
+                                .requestMatchers("/book/test").hasRole("LIBRARIAN")
+                                .requestMatchers("/user/getAll").hasRole("LIBRARIAN")
+                                .requestMatchers("/book/delete").hasRole("LIBRARIAN")
                                 .requestMatchers("/**").permitAll())
                 //W konfiguracji nie używamy prefiksu ROLE_
                 .build();

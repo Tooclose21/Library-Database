@@ -42,6 +42,7 @@ public class JWTTokenFilter extends OncePerRequestFilter {
                     .getPayload();
             Integer userId = (Integer) claims.get("id");
             String userRole = (String) claims.get("userRole");
+            System.out.println(userRole);
             Authentication authentication =
                     new UsernamePasswordAuthenticationToken(userId, null,
                             List.of(new SimpleGrantedAuthority(userRole)));

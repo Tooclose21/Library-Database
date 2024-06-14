@@ -10,4 +10,6 @@ public class TechnologieSiecioweApplication {
         SpringApplication.run(TechnologieSiecioweApplication.class, args);
     }
 
+
+
 }

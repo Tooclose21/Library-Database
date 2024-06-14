@@ -11,6 +11,7 @@ import com.example.technologiesieciowe.repository.LoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -65,7 +66,15 @@ public class BookController {
      */
     @GetMapping("/getAll")
     public @ResponseBody Iterable<BookDto> getAllBooks(){
-        return StreamSupport.stream(bookRepository.findAll().spliterator(),false).map(BookMapper::toDto).toList();
+        return StreamSupport.stream(bookRepository.findAll().spliterator(),false)
+                .map(BookMapper::toDto)
+                .filter(it -> it.getAvailableCopies() != 0)
+                .toList();
+    }
+
+    @GetMapping("/getById")
+    public @ResponseBody BookDto getById(@RequestParam int id){
+        return BookMapper.toDto(bookRepository.findById(id).orElseThrow());
     }
 
     /**
@@ -82,12 +91,16 @@ public class BookController {
     /**
      * Delete book.
      *
-     * @param isbn the isbn
+     * @param book the book
      */
-    @DeleteMapping("/delete")
-    public void deleteBook(@RequestParam String isbn){
+    @PostMapping("/delete")
+    public @ResponseBody Iterable<BookDto> deleteBook(@RequestBody BookDto book){
         try {
-            bookRepository.delete(bookRepository.findByIsbn(isbn));
+            bookRepository.save(BookMapper.fromDto(book));
+            return StreamSupport.stream(bookRepository.findAll().spliterator(),false)
+                    .map(BookMapper::toDto)
+                    .filter(it -> it.getAvailableCopies() != 0)
+                    .toList();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete book");
         }
@@ -100,4 +113,11 @@ public class BookController {
         return StreamSupport.stream(loanRepository.findByUser_Id(userId).spliterator(),false)
                 .map(loan -> loan.getBook()).map(BookMapper::toDto).toList();
     }
+
+    @GetMapping("/test")
+    public ResponseEntity<?> test(){
+        return ResponseEntity.ok().build();
+    }
 }
+
+
